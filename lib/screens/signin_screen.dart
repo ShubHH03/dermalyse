@@ -2,8 +2,23 @@
   import 'package:icons_plus/icons_plus.dart';
   import 'package:login_signup/screens/signup_screen.dart';
   import 'package:login_signup/widgets/custom_scaffold.dart';
+  import 'package:login_signup/screens/patient_form_screen.dart';
 
   import '../theme/theme.dart';
+
+  void main() {
+    runApp(MyApp());
+  }
+
+  class MyApp extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+      return MaterialApp(
+        title: 'My App',
+        home: SignInScreen(),
+      );
+    }
+  }
 
   class SignInScreen extends StatefulWidget {
     const SignInScreen({super.key});
@@ -167,6 +182,12 @@
                                     content: Text('Processing Data'),
                                   ),
                                 );
+
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const PatientFormScreen()),
+                                );
+
                               } else if (!rememberPassword) {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(

@@ -171,7 +171,7 @@
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
                                       content: Text(
-                                          'Please agree to the processing of personal data')),
+                                          'Please agree to the Terms & Conditions')),
                                 );
                               }
                             },

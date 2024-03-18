@@ -9,7 +9,7 @@ from io import BytesIO
 app = Flask(__name__)
 
 # Load your model
-model = tf.keras.models.load_model('xception.keras')
+model = tf.keras.models.load_model('API/classification_model/xception.keras')
 
 class_labels = {'Acne': 0, 'Actinic keratosis': 1, 'Basal Cell Carcinoma': 2, 'Benign keratosis': 3, 'Dermatofibroma': 4, 'Eczema': 5, 'Fungal Infections ': 6, 'Melanocytic Nevi': 7, 'Melanoma': 8, 'Normal Skin': 9, 'Rosacea': 10, 'Squamous cell carcinoma': 11, 'Urticaria Hives': 12, 'Vascular Tumors': 13, 'Warts Molluscum and other Viral Infections': 14}
 

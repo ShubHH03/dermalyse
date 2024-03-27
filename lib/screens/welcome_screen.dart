@@ -5,6 +5,23 @@ import 'package:login_signup/theme/theme.dart';
 import 'package:login_signup/widgets/custom_scaffold.dart';
 import 'package:login_signup/widgets/welcome_button.dart';
 
+
+// void main() {
+//   runApp(const MyApp());
+// }
+//
+// class MyApp extends StatelessWidget {
+//   const MyApp({Key? key}) : super(key: key);
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return MaterialApp(
+//       title: 'My App',
+//       home: WelcomeScreen(),
+//     );
+//   }
+// }
+
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
 

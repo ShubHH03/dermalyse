@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'set_photo_screen.dart';
+
 
 class PatientFormScreen extends StatelessWidget {
   const PatientFormScreen({Key? key}) : super(key: key);
@@ -269,21 +271,26 @@ class PatientFormScreen extends StatelessWidget {
   vertical: 10,
   ),
   ),
-  ElevatedButton(
-  style: ElevatedButton.styleFrom(
-  minimumSize: const Size(375, 50),
-  backgroundColor: const Color(0xFF416FDF),
-  ),
-  onPressed: () {},
-  child: const Text(
-  'Submit',
-  style: TextStyle(
-  fontSize: 20,
-  color: Colors.white,
-  fontWeight: FontWeight.bold,
-  ),
-  ),
-  ),
+    ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        minimumSize: const Size(375, 50),
+        backgroundColor: const Color(0xFF416FDF),
+      ),
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => SetPhotoScreen()),
+        );
+      },
+      child: const Text(
+        'Submit',
+        style: TextStyle(
+          fontSize: 20,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    ),
   ],
   ),
   ),

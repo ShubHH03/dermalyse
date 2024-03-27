@@ -4,10 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:login_signup/screens/treatment_page.dart';
 import 'package:login_signup/theme/theme.dart';
 import '../widgets/common_buttons.dart';
 import '../constants.dart';
 import 'select_photo_options_screen.dart';
+
+
+
 
 class SetPhotoScreen extends StatefulWidget {
   const SetPhotoScreen({Key? key});
@@ -160,12 +164,18 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                     itemCount: 3,
                     itemBuilder: (context, index) {
                       return ListTile(
-                        title: Text('Disease #$index'),
+                        title: Text('Acne'),
                         subtitle: Text('Subtitle'),
                         trailing: Icon(Icons.arrow_forward),
                         onTap: () {
-                          // Handle tap on list item
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => TreatmentPage(),
+                            ),
+                          );
                         },
+
                       );
                     },
                   ),

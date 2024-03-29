@@ -1,3 +1,195 @@
+// import 'dart:io';
+//
+// import 'package:flutter/material.dart';
+// import 'package:flutter/services.dart';
+// import 'package:image_cropper/image_cropper.dart';
+// import 'package:image_picker/image_picker.dart';
+// import 'package:login_signup/screens/treatment_page.dart';
+// import 'package:login_signup/theme/theme.dart';
+// import '../widgets/common_buttons.dart';
+// import '../constants.dart';
+// import 'select_photo_options_screen.dart';
+//
+//
+//
+//
+// class SetPhotoScreen extends StatefulWidget {
+//   const SetPhotoScreen({Key? key});
+//
+//   static const id = 'set_photo_screen';
+//
+//   @override
+//   State<SetPhotoScreen> createState() => _SetPhotoScreenState();
+// }
+//
+// class _SetPhotoScreenState extends State<SetPhotoScreen> {
+//   File? _image;
+//   bool _showLists = false; // Track if the lists should be shown
+//
+//   Future _pickImage(ImageSource source) async {
+//     try {
+//       final image = await ImagePicker().pickImage(source: source);
+//       if (image == null) return;
+//       File? img = File(image.path);
+//       img = await _cropImage(imageFile: img);
+//       setState(() {
+//         _image = img;
+//         Navigator.of(context).pop();
+//       });
+//     } on PlatformException catch (e) {
+//       print(e);
+//       Navigator.of(context).pop();
+//     }
+//   }
+//
+//   Future<File?> _cropImage({required File imageFile}) async {
+//     CroppedFile? croppedImage = await ImageCropper().cropImage(sourcePath: imageFile.path);
+//     if (croppedImage == null) return null;
+//     return File(croppedImage.path);
+//   }
+//
+//   void _toggleListsVisibility() {
+//     setState(() {
+//       _showLists = !_showLists;
+//     });
+//   }
+//
+//   void _showSelectPhotoOptions(BuildContext context) {
+//     showModalBottomSheet(
+//       context: context,
+//       isScrollControlled: true,
+//       shape: const RoundedRectangleBorder(
+//         borderRadius: BorderRadius.vertical(
+//           top: Radius.circular(25.0),
+//         ),
+//       ),
+//       builder: (context) => DraggableScrollableSheet(
+//         initialChildSize: 0.28,
+//         maxChildSize: 0.4,
+//         minChildSize: 0.28,
+//         expand: false,
+//         builder: (context, scrollController) {
+//           return SingleChildScrollView(
+//             controller: scrollController,
+//             child: SelectPhotoOptionsScreen(
+//               onTap: _pickImage,
+//             ),
+//           );
+//         },
+//       ),
+//     );
+//   }
+//
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         backgroundColor: lightColorScheme.primary,
+//         title: Text(
+//           'Dermalyse',
+//           style: TextStyle(color: Colors.white),
+//         ),
+//       ),
+//       body: SafeArea(
+//         child: Padding(
+//           padding: const EdgeInsets.all(20.0),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//             children: [
+//               Column(
+//                 crossAxisAlignment: CrossAxisAlignment.start,
+//                 children: const [
+//                   SizedBox(height: 30),
+//                   Text(
+//                     'Select an image to analyze!',
+//                     style: kHeadTextStyle,
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 15,),
+//               Expanded(
+//                 child: Center(
+//                   child: GestureDetector(
+//                     behavior: HitTestBehavior.translucent,
+//                     onTap: () {
+//                       _showSelectPhotoOptions(context);
+//                     },
+//                     child: Container(
+//                       height: 300.0,
+//                       width: 300.0,
+//                       decoration: BoxDecoration(
+//                         color: Colors.grey.shade200,
+//                       ),
+//                       child: Center(
+//                         child: _image == null
+//                             ? Text(
+//                           'No image selected',
+//                           style: TextStyle(fontSize: 20),
+//                         )
+//                             : Image.file(
+//                           _image!,
+//                           fit: BoxFit.cover,
+//                         ),
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//               ),
+//               SizedBox(height: 16),
+//               Column(
+//                 crossAxisAlignment: CrossAxisAlignment.center, // Align buttons in the center horizontally
+//                 children: [
+//                   CommonButtons(
+//                     onTap: () => _showSelectPhotoOptions(context),
+//                     backgroundColor: lightColorScheme.primary,
+//                     textColor: Colors.white,
+//                     textLabel: 'Select Image',
+//                   ),
+//                   SizedBox(height : 16), // Add spacing between buttons
+//                   CommonButtons(
+//                     onTap: () {
+//                       _toggleListsVisibility();
+//                     },
+//                     backgroundColor: lightColorScheme.primary,
+//                     textColor: Colors.white,
+//                     textLabel: 'Results',
+//                   ),
+//                 ],
+//               ),
+//               SizedBox(height: 16),
+//               if (_showLists)
+//                 Expanded(
+//                   child: ListView.builder(
+//                     itemCount: 3,
+//                     itemBuilder: (context, index) {
+//                       return ListTile(
+//                         title: Text('Acne'),
+//                         subtitle: Text('Subtitle'),
+//                         trailing: Icon(Icons.arrow_forward),
+//                         onTap: () {
+//                           Navigator.push(
+//                             context,
+//                             MaterialPageRoute(
+//                               builder: (context) => TreatmentPage(),
+//                             ),
+//                           );
+//                         },
+//
+//                       );
+//                     },
+//                   ),
+//                 ),
+//             ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+// }
+
+// --------- test -----------------
+
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -9,9 +201,8 @@ import 'package:login_signup/theme/theme.dart';
 import '../widgets/common_buttons.dart';
 import '../constants.dart';
 import 'select_photo_options_screen.dart';
-
-
-
+import 'package:http/http.dart' as http;
+import 'dart:async';
 
 class SetPhotoScreen extends StatefulWidget {
   const SetPhotoScreen({Key? key});
@@ -43,9 +234,34 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
   }
 
   Future<File?> _cropImage({required File imageFile}) async {
-    CroppedFile? croppedImage = await ImageCropper().cropImage(sourcePath: imageFile.path);
+    CroppedFile? croppedImage =
+        await ImageCropper().cropImage(sourcePath: imageFile.path);
     if (croppedImage == null) return null;
     return File(croppedImage.path);
+  }
+
+  Future<void> uploadImage() async {
+    try {
+      print(_image);
+      print('upload here');
+      var stream = _image!.openRead();
+      var length = await _image!.length();
+      var uri = Uri.parse(' http://127.0.0.1:5000/predict2');
+      var request = http.MultipartRequest('POST', uri);
+      var multipart = http.MultipartFile('file', stream, length);
+      request.files.add(multipart);
+      var response = await request.send();
+      if (response.statusCode == 200) {
+        print('Upload successful');
+        // Handle successful upload response here
+      } else {
+        print('Upload failed with status: ${response.statusCode}');
+        // Handle other status codes if needed
+      }
+    } catch (e) {
+      print('Error uploading image: $e');
+      // Handle any exceptions that occur during the upload process
+    }
   }
 
   void _toggleListsVisibility() {
@@ -107,7 +323,9 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                   ),
                 ],
               ),
-              SizedBox(height: 15,),
+              SizedBox(
+                height: 15,
+              ),
               Expanded(
                 child: Center(
                   child: GestureDetector(
@@ -124,13 +342,13 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                       child: Center(
                         child: _image == null
                             ? Text(
-                          'No image selected',
-                          style: TextStyle(fontSize: 20),
-                        )
+                                'No image selected',
+                                style: TextStyle(fontSize: 20),
+                              )
                             : Image.file(
-                          _image!,
-                          fit: BoxFit.cover,
-                        ),
+                                _image!,
+                                fit: BoxFit.cover,
+                              ),
                       ),
                     ),
                   ),
@@ -138,7 +356,8 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
               ),
               SizedBox(height: 16),
               Column(
-                crossAxisAlignment: CrossAxisAlignment.center, // Align buttons in the center horizontally
+                crossAxisAlignment: CrossAxisAlignment
+                    .center, // Align buttons in the center horizontally
                 children: [
                   CommonButtons(
                     onTap: () => _showSelectPhotoOptions(context),
@@ -146,10 +365,10 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                     textColor: Colors.white,
                     textLabel: 'Select Image',
                   ),
-                  SizedBox(height : 16), // Add spacing between buttons
+                  SizedBox(height: 16), // Add spacing between buttons
                   CommonButtons(
                     onTap: () {
-                      _toggleListsVisibility();
+                      uploadImage();
                     },
                     backgroundColor: lightColorScheme.primary,
                     textColor: Colors.white,
@@ -175,7 +394,6 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                             ),
                           );
                         },
-
                       );
                     },
                   ),

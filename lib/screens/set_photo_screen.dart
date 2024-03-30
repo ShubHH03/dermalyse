@@ -191,6 +191,7 @@
 // --------- test -----------------
 
 import 'dart:io';
+import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -216,6 +217,8 @@ class SetPhotoScreen extends StatefulWidget {
 class _SetPhotoScreenState extends State<SetPhotoScreen> {
   File? _image;
   bool _showLists = false; // Track if the lists should be shown
+  Map<String, dynamic> _responseData =
+      {}; // State variable to store response data
 
   Future _pickImage(ImageSource source) async {
     try {
@@ -243,28 +246,32 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
   Future<void> uploadImage() async {
     try {
       print(_image);
-      print('upload here');
-      var stream = _image!.openRead();
-      var length = await _image!.length();
-      var uri = Uri.parse(' http://127.0.0.1:5000/predict2');
-      var request = http.MultipartRequest('POST', uri);
-      var multipart = http.MultipartFile('file', stream, length);
-      request.files.add(multipart);
-      var response = await request.send();
+      Uint8List bytes = await _image!.readAsBytes();
+      String base64Image = base64Encode(bytes);
+      var uri = Uri.parse('http://10.0.2.2:5000/predict');
+      // Prepare the JSON payload
+      var payload = jsonEncode({'image': base64Image});
+      // Send the POST request with the JSON payload
+      var response = await http.post(uri,
+          headers: {"Content-Type": "application/json"}, body: payload);
       if (response.statusCode == 200) {
         print('Upload successful');
-        // Handle successful upload response here
+        var responseData = jsonDecode(response.body);
+        setState(() {
+          _responseData = responseData;
+        });
       } else {
         print('Upload failed with status: ${response.statusCode}');
-        // Handle other status codes if needed
       }
     } catch (e) {
       print('Error uploading image: $e');
-      // Handle any exceptions that occur during the upload process
     }
   }
 
   void _toggleListsVisibility() {
+    if (!_showLists) {
+      uploadImage(); // Trigger image upload if not already done
+    }
     setState(() {
       _showLists = !_showLists;
     });
@@ -356,8 +363,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
               ),
               SizedBox(height: 16),
               Column(
-                crossAxisAlignment: CrossAxisAlignment
-                    .center, // Align buttons in the center horizontally
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   CommonButtons(
                     onTap: () => _showSelectPhotoOptions(context),
@@ -365,11 +371,9 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                     textColor: Colors.white,
                     textLabel: 'Select Image',
                   ),
-                  SizedBox(height: 16), // Add spacing between buttons
+                  SizedBox(height: 16),
                   CommonButtons(
-                    onTap: () {
-                      uploadImage();
-                    },
+                    onTap: _toggleListsVisibility,
                     backgroundColor: lightColorScheme.primary,
                     textColor: Colors.white,
                     textLabel: 'Results',
@@ -380,11 +384,12 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
               if (_showLists)
                 Expanded(
                   child: ListView.builder(
-                    itemCount: 3,
+                    itemCount: _responseData.length,
                     itemBuilder: (context, index) {
+                      String key = _responseData.keys.elementAt(index);
                       return ListTile(
-                        title: Text('Acne'),
-                        subtitle: Text('Subtitle'),
+                        title: Text(key),
+                        subtitle: Text('${_responseData[key]}'),
                         trailing: Icon(Icons.arrow_forward),
                         onTap: () {
                           Navigator.push(

@@ -1,5 +1,3 @@
-// import 'dart:io';
-//
 // import 'package:flutter/material.dart';
 // import 'package:flutter/services.dart';
 // import 'package:image_cropper/image_cropper.dart';
@@ -9,9 +7,11 @@
 // import '../widgets/common_buttons.dart';
 // import '../constants.dart';
 // import 'select_photo_options_screen.dart';
-//
-//
-//
+// import 'package:http/http.dart' as http;
+// import 'dart:async';
+// import 'dart:convert';
+// import 'dart:io';
+// import 'package:excel/excel.dart';
 //
 // class SetPhotoScreen extends StatefulWidget {
 //   const SetPhotoScreen({Key? key});
@@ -25,6 +25,22 @@
 // class _SetPhotoScreenState extends State<SetPhotoScreen> {
 //   File? _image;
 //   bool _showLists = false; // Track if the lists should be shown
+//   Map<String, dynamic> _responseData =
+//   {}; // State variable to store response data
+//   late Excel excel;
+//   String? excelContent;
+//
+//   @override
+//   void initState() {
+//     super.initState();
+//     loadExcel();
+//   }
+//
+//   Future<void> loadExcel() async {
+//     ByteData data = await rootBundle.load('assets/data.xlsx');
+//     List<int> bytes = data.buffer.asUint8List();
+//     excel = Excel.decodeBytes(bytes);
+//   }
 //
 //   Future _pickImage(ImageSource source) async {
 //     try {
@@ -43,12 +59,41 @@
 //   }
 //
 //   Future<File?> _cropImage({required File imageFile}) async {
-//     CroppedFile? croppedImage = await ImageCropper().cropImage(sourcePath: imageFile.path);
+//     CroppedFile? croppedImage =
+//     await ImageCropper().cropImage(sourcePath: imageFile.path);
 //     if (croppedImage == null) return null;
 //     return File(croppedImage.path);
 //   }
 //
+//   Future<void> uploadImage() async {
+//     try {
+//       print(_image);
+//       Uint8List bytes = await _image!.readAsBytes();
+//       String base64Image = base64Encode(bytes);
+//       var uri = Uri.parse('http://192.168.108.119:5555/predict');
+//       // Prepare the JSON payload
+//       var payload = jsonEncode({'image': base64Image});
+//       // Send the POST request with the JSON payload
+//       var response = await http.post(uri,
+//           headers: {"Content-Type": "application/json"}, body: payload);
+//       if (response.statusCode == 200) {
+//         print('Upload successful');
+//         var responseData = jsonDecode(response.body);
+//         setState(() {
+//           _responseData = responseData;
+//         });
+//       } else {
+//         print('Upload failed with status: ${response.statusCode}');
+//       }
+//     } catch (e) {
+//       print('Error uploading image: $e');
+//     }
+//   }
+//
 //   void _toggleListsVisibility() {
+//     if (!_showLists) {
+//       uploadImage(); // Trigger image upload if not already done
+//     }
 //     setState(() {
 //       _showLists = !_showLists;
 //     });
@@ -107,7 +152,9 @@
 //                   ),
 //                 ],
 //               ),
-//               SizedBox(height: 15,),
+//               SizedBox(
+//                 height: 15,
+//               ),
 //               Expanded(
 //                 child: Center(
 //                   child: GestureDetector(
@@ -138,7 +185,7 @@
 //               ),
 //               SizedBox(height: 16),
 //               Column(
-//                 crossAxisAlignment: CrossAxisAlignment.center, // Align buttons in the center horizontally
+//                 crossAxisAlignment: CrossAxisAlignment.center,
 //                 children: [
 //                   CommonButtons(
 //                     onTap: () => _showSelectPhotoOptions(context),
@@ -146,11 +193,9 @@
 //                     textColor: Colors.white,
 //                     textLabel: 'Select Image',
 //                   ),
-//                   SizedBox(height : 16), // Add spacing between buttons
+//                   SizedBox(height: 16),
 //                   CommonButtons(
-//                     onTap: () {
-//                       _toggleListsVisibility();
-//                     },
+//                     onTap: _toggleListsVisibility,
 //                     backgroundColor: lightColorScheme.primary,
 //                     textColor: Colors.white,
 //                     textLabel: 'Results',
@@ -161,21 +206,29 @@
 //               if (_showLists)
 //                 Expanded(
 //                   child: ListView.builder(
-//                     itemCount: 3,
+//                     itemCount: _responseData.length,
 //                     itemBuilder: (context, index) {
+//                       String key = _responseData.keys.elementAt(index);
+//                       String? excelContent;
+//                       if (excel.tables['vyom']!.rows.length > 0) {
+//                         var excelRow = excel.tables['vyom']!.rows
+//                             .firstWhere((row) => row[0] == key, orElse: () => []);
+//                         if (excelRow.isNotEmpty && excelRow.length > 1) {
+//                           excelContent = excelRow[1].toString();
+//                         }
+//                       }
 //                       return ListTile(
-//                         title: Text('Acne'),
-//                         subtitle: Text('Subtitle'),
+//                         title: Text(key),
+//                         subtitle: Text(excelContent ?? ''),
 //                         trailing: Icon(Icons.arrow_forward),
 //                         onTap: () {
 //                           Navigator.push(
 //                             context,
 //                             MaterialPageRoute(
-//                               builder: (context) => TreatmentPage(),
+//                               builder: (context) => TreatmentPage(excelContent: excelContent ?? ''),
 //                             ),
 //                           );
 //                         },
-//
 //                       );
 //                     },
 //                   ),
@@ -188,7 +241,7 @@
 //   }
 // }
 
-// --------- test -----------------
+// --------- this is og -----------------
 
 import 'dart:io';
 import 'dart:convert';
@@ -245,10 +298,9 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
 
   Future<void> uploadImage() async {
     try {
-      print(_image);
       Uint8List bytes = await _image!.readAsBytes();
       String base64Image = base64Encode(bytes);
-      var uri = Uri.parse('http://10.0.2.2:5000/predict');
+      var uri = Uri.parse('http://192.168.31.229:5000/predict');
       // Prepare the JSON payload
       var payload = jsonEncode({'image': base64Image});
       // Send the POST request with the JSON payload
@@ -387,6 +439,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                     itemCount: _responseData.length,
                     itemBuilder: (context, index) {
                       String key = _responseData.keys.elementAt(index);
+                      print(key);
                       return ListTile(
                         title: Text(key),
                         subtitle: Text('${_responseData[key]}'),
@@ -395,7 +448,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => TreatmentPage(),
+                              builder: (context) => TreatmentPage(diseaseName: key),
                             ),
                           );
                         },

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:excel/excel.dart';
 
+
 class TreatmentPage extends StatefulWidget {
   final String diseaseName;
 
@@ -14,51 +15,69 @@ class TreatmentPage extends StatefulWidget {
 class _TreatmentPageState extends State<TreatmentPage> {
   String _treatmentContent = '';
 
+
   @override
   void initState() {
     super.initState();
     _loadTreatmentContent();
   }
-
   Future<void> _loadTreatmentContent() async {
     try {
-      final bytes = await rootBundle.load('assets/treatment_data.xlsx');
+      final bytes = await rootBundle.load('assets/Jiten.xlsx');
       final excel = Excel.decodeBytes(bytes.buffer.asUint8List());
       final sheet = excel.tables.keys.first;
-      final rows = excel.tables[sheet]!.rows;
+      final table = excel.tables[sheet];
 
-      // Skip the first row (header row) and start from the second row
-      final dataRows = rows.skip(1);
+      if (table == null) {
+        throw Exception("Sheet '$sheet' not found");
+      }
 
-      for (var row in dataRows) {
-        if (row.length >= 2) {
-          // Explicitly check if the first cell's value is a String
-          if (row[0]?.value is String) {
-            String diseaseName = row[0]?.value as String;
-            // Trim spaces and compare
-            if (diseaseName.trim().toLowerCase() == widget.diseaseName.trim().toLowerCase()) {
-              print("Match found for ${widget.diseaseName}"); // Debugging line
-              setState(() {
-                _treatmentContent = (row[1]?.value as String?) ?? 'Treatment content not found';
-                print("Setting treatment content for ${widget.diseaseName}: $_treatmentContent"); // Debugging line
-              });
-              return; // Early return after setting treatment content
-            }
+      for (var row in table.rows) {
+        if (row.isNotEmpty && row.length >= 2) {
+          var diseaseName = extractCellValueAsString(row[0]); // Extract disease name
+          var treatmentContent = extractCellValueAsString(row[1]); // Extract treatment content
+
+          // Check if disease name matches widget's diseaseName (case-insensitive)
+          if (diseaseName != null &&
+              diseaseName.trim().toLowerCase() == widget.diseaseName.trim().toLowerCase()) {
+            print("Match found for ${widget.diseaseName}");
+
+            setState(() {
+              _treatmentContent = treatmentContent ?? 'Treatment content not found';
+              print("Setting treatment content for ${widget.diseaseName}: $_treatmentContent");
+            });
+            return; // Exit the function after finding a match
           }
         }
       }
 
-      print("No match found for ${widget.diseaseName}"); // Debugging line
+      // If no match is found, set a default treatment content
       setState(() {
-        _treatmentContent = 'Treatment content not found for ${widget.diseaseName}';
+        _treatmentContent = 'Treatment content not found';
       });
     } catch (e) {
-      print("Error loading treatment data: $e"); // Debugging line
+      print("Error loading treatment data: $e");
       setState(() {
         _treatmentContent = 'Error loading treatment data';
       });
     }
   }
+
+  String? extractCellValueAsString(dynamic cellValue) {
+    if (cellValue == null) {
+      return null;
+    }
+
+    if (cellValue is Data) {
+      var cellData = cellValue.value;
+      if (cellData is TextCellValue) {
+        return cellData.value;
+      }
+    }
+
+    return null; // Handle other types or unsupported cell values
+  }
+
 
   @override
   Widget build(BuildContext context) {

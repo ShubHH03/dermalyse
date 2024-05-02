@@ -23,7 +23,7 @@ class _TreatmentPageState extends State<TreatmentPage> {
   }
   Future<void> _loadTreatmentContent() async {
     try {
-      final bytes = await rootBundle.load('assets/Jiten.xlsx');
+      final bytes = await rootBundle.load('assets/treatment.xlsx');
       final excel = Excel.decodeBytes(bytes.buffer.asUint8List());
       final sheet = excel.tables.keys.first;
       final table = excel.tables[sheet];

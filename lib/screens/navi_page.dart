@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:login_signup/theme/theme.dart';
 import 'package:login_signup/screens/set_photo_screen.dart';
 
 void main() {

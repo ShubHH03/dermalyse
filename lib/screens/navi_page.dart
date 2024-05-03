@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:login_signup/theme/theme.dart';
 import 'package:login_signup/screens/set_photo_screen.dart';
+import 'package:login_signup/screens/profile.dart';
 
 void main() {
   runApp(MyApp());
@@ -46,9 +48,13 @@ class _NaviPageState extends State<NaviPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+
                     ElevatedButton(
                       onPressed: () {
-                        // No navigation
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => Profile()),
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         minimumSize: Size(250, 100),
@@ -61,6 +67,8 @@ class _NaviPageState extends State<NaviPage> {
                         ),
                       ),
                     ),
+
+
                     SizedBox(height: 20),
                     ElevatedButton(
                       onPressed: () {
@@ -89,7 +97,7 @@ class _NaviPageState extends State<NaviPage> {
                         minimumSize: Size(250, 100),
                       ),
                       child: Text(
-                        'PAST RESULTS',
+                        'SHARE EXPERIENCE',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,

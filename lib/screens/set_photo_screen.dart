@@ -55,7 +55,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
     try {
       Uint8List bytes = await _image!.readAsBytes();
       String base64Image = base64Encode(bytes);
-      var uri = Uri.parse('https://a121-2409-40c0-11a4-97fc-dc08-41de-8205-c29b.ngrok-free.app/predict');
+      var uri = Uri.parse('https://6483-2401-4900-57d6-fcff-c0ee-c57c-4c4-2b81.ngrok-free.app/predict');
       // Prepare the JSON payload
       var payload = jsonEncode({'image': base64Image});
       // Send the POST request with the JSON payload

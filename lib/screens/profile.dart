@@ -1,6 +1,4 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:login_signup/theme/theme.dart';
 
 void main() {
   runApp(MaterialApp(
@@ -9,12 +7,12 @@ void main() {
     theme: ThemeData(
       primarySwatch: Colors.blue,
     ),
-    home: Profile(), // Replace with your app's home widget
+    home: Profile(),
   ));
 }
 
 class Profile extends StatefulWidget {
-  const Profile({super.key});
+  const Profile({Key? key}) : super(key: key);
 
   @override
   State<Profile> createState() => _ProfileState();
@@ -24,124 +22,132 @@ class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: lightColorScheme.primary,
-        title: const Text(
-          'DERMALYSE',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-        ),
-        leading: BackButton(
-          onPressed: () => Navigator.of(context).pop(),
-          color: Colors.white,
-        ),
-        centerTitle: true,
+      body: Column(
+        children: [
+          // Blue header section with profile
+          Container(
+            color: Colors.blue,
+            padding: EdgeInsets.only(top: 50, bottom: 30),
+            child: Column(
+              children: [
+                // Profile picture
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.blue.shade600,
+                    image: DecorationImage(
+                      image: AssetImage('assets/profile_placeholder.jpg'),
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(
+                        padding: EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(Icons.camera_alt, size: 16, color: Colors.blue),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 15),
+                // Name
+                Text(
+                  'Amelia Renata',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(height: 20),
+                // Metrics row
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    // Heart rate
+                    _buildMetricColumn('Heart rate', '215bpm', Icons.favorite),
+                    Container(height: 40, width: 1, color: Colors.white.withOpacity(0.3)),
+                    // Calories
+                    _buildMetricColumn('Calories', '756cal', Icons.local_fire_department),
+                    Container(height: 40, width: 1, color: Colors.white.withOpacity(0.3)),
+                    // Weight
+                    _buildMetricColumn('Weight', '103lbs', Icons.fitness_center),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          // Menu items
+          Expanded(
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                children: [
+                  _buildMenuItem('My Analysis', Icons.favorite_border),
+                  Divider(height: 1),
+                  _buildMenuItem('Appointmnet', Icons.calendar_today_outlined),
+                  Divider(height: 1),
+                  _buildMenuItem('Payment Method', Icons.account_balance_wallet_outlined),
+                  Divider(height: 1),
+                  _buildMenuItem('FAQs', Icons.chat_bubble_outline),
+                  Spacer(),
+                  // Bottom navigation
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(height: 50),
-            CircleAvatar(
-              radius: 50,
-              backgroundColor: lightColorScheme.primary,
-              child: Icon(
-                Icons.person,
-                size: 60,
-                color: Colors.white,
-              ),
-            ),
-            SizedBox(height: 20),
-            Text(
-              'mikamail@gmail.com',
-              style: TextStyle(fontSize: 18),
-            ),
-        Padding(
-          padding: const EdgeInsets.all(80.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // SizedBox(height:0),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => Profile()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(250, 50),
-                ),
-                child: Text(
-                  'DETAILS',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
+    );
+  }
 
-              Divider(),
-              SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // Navigation
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(250, 50),
-                ),
-                icon: Icon(Icons.book), // Added book icon
-                label: Text(
-                  'HISTORY',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Divider(),
-              SizedBox(height: 10),
-              ElevatedButton.icon(
-                onPressed: () {
-                  // No navigation
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: Size(250, 50),
-                ),
-                icon: Icon(Icons.location_on), // Added location icon
-                label: Text(
-                  'MUMBAI',
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-              Divider(),
-            ],
+  Widget _buildMetricColumn(String label, String value, IconData icon) {
+    return Column(
+      children: [
+        Icon(icon, color: Colors.white, size: 24),
+        SizedBox(height: 5),
+        Text(
+          label,
+          style: TextStyle(color: Colors.white, fontSize: 14),
+        ),
+        SizedBox(height: 5),
+        Text(
+          value,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
           ),
         ),
-          //   SizedBox(height: 50),
-          //   ListTile(
-          //     leading: Icon(Icons.person),
-          //     title: Text('My Details'),
-          //     trailing: Icon(Icons.arrow_forward_ios),
-          //   ),
-          //   Divider(),
-          //   ListTile(
-          //     leading: Icon(Icons.book),
-          //     title: Text('History'),
-          //   ),
-          //   Divider(),
-          //   ListTile(
-          //     leading: Icon(Icons.location_on),
-          //     title: Text('Mumbai'),
-          //   ),
-          //   SizedBox(height: 0),
-          //   Divider(),
-          //   //
-          //
-         ],
+      ],
+    );
+  }
+
+  Widget _buildMenuItem(String title, IconData icon) {
+    return ListTile(
+      leading: Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: Colors.blue.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(8),
         ),
+        child: Icon(icon, color: Colors.blue),
       ),
+      title: Text(
+        title,
+        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+      ),
+      trailing: Icon(Icons.chevron_right, color: Colors.grey),
+      contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+      onTap: () {},
     );
   }
 }

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:login_signup/theme/theme.dart';
+import 'package:login_signup/screens/home_screen.dart';
 import 'package:login_signup/screens/set_photo_screen.dart';
 import 'package:login_signup/screens/profile.dart';
 
@@ -15,101 +15,95 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: NaviPage(),
+      home: BottomNavigation(),
     );
   }
 }
 
-class NaviPage extends StatefulWidget {
+class BottomNavigation extends StatefulWidget {
   @override
-  _NaviPageState createState() => _NaviPageState();
+  _BottomNavigationState createState() => _BottomNavigationState();
 }
 
-class _NaviPageState extends State<NaviPage> {
+class _BottomNavigationState extends State<BottomNavigation> {
+  int _selectedIndex = 0;
+
+  // List of pages to navigate to
+  final List<Widget> _pages = [
+    HomePage(),
+    AnalysisPage(),
+    DoctorsPage(),
+    Profile()
+  ];
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: AssetImage('assets/images/bg1.png'),
-            fit: BoxFit.cover,
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: <BottomNavigationBarItem>[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
           ),
-        ),
-        child: Center(
-          child: Stack(
-            children: [
-              Container(
-                padding: EdgeInsets.all(30),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => Profile()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(250, 100),
-                      ),
-                      child: Text(
-                        'PROFILE',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-
-
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => SetPhotoScreen()),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(250, 100),
-                      ),
-                      child: Text(
-                        'START ANALYSIS',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: 20),
-                    ElevatedButton(
-                      onPressed: () {
-                        // No navigation
-                      },
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: Size(250, 100),
-                      ),
-                      child: Text(
-                        'SHARE EXPERIENCE',
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medical_services),
+            label: 'Analysis',
           ),
-        ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medical_information),
+            label: 'Doctors',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.person),
+            label: 'Profile',
+          ),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue.shade700,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+      ),
+    );
+  }
+}
+
+// Placeholder pages - you'll need to implement these
+class HomePage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return HomeScreen(); // Assuming HomeScreen is your home page
+  }
+}
+
+class AnalysisPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SetPhotoScreen(); // Assuming SetPhotoScreen is your analysis page
+  }
+}
+
+class DoctorsPage extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Doctors')),
+      body: ListView(
+        children: [
+          ListTile(
+            title: Text('Dr. Marcus Horizon'),
+            subtitle: Text('Cardiologist'),
+            trailing: Text('4.7 ★'),
+          ),
+          // Add more doctor listings here
+        ],
       ),
     );
   }

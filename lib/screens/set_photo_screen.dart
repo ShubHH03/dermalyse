@@ -42,7 +42,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop Image',
-          toolbarColor: Colors.deepPurple,
+          toolbarColor: Colors.blue.shade700,
           toolbarWidgetColor: Colors.white,
           initAspectRatio: CropAspectRatioPreset.original,
           lockAspectRatio: false,
@@ -169,7 +169,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
     return ElevatedButton(
       onPressed: onTap,
       style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.deepPurple.shade50,
+        backgroundColor: Colors.blue.shade50,
         foregroundColor: Colors.blue.shade700,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(15),
@@ -216,10 +216,10 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                   onTap: () => _showSelectPhotoOptions(context),
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.deepPurple.shade50,
+                      color: Colors.blue.shade50,
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(
-                        color: Colors.deepPurple.shade100,
+                        color: Colors.blue.shade100,
                         width: 2,
                       ),
                     ),
@@ -237,7 +237,6 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                                 Text(
                                     'Tap to Select Image',
                                   style: TextStyle(
-                                    // color: Colors.deepPurple,
                                     fontSize: 18,
                                   ),
                                 ),
@@ -323,7 +322,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                               key,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Colors.deepPurple,
+                                color: Colors.blue,
                               ),
                             ),
                             subtitle: Text(
@@ -332,7 +331,7 @@ class _SetPhotoScreenState extends State<SetPhotoScreen> {
                             ),
                             trailing: Icon(
                               Icons.arrow_forward_ios,
-                              color: Colors.deepPurple,
+                              color: Colors.blue,
                             ),
                             onTap: () {
                               Navigator.push(

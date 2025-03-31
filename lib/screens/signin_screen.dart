@@ -31,6 +31,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
+  String _selectedRole = 'Patient'; // Default role
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +51,76 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Role selection toggle
+              Container(
+                margin: EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(10),
+                  color: Colors.grey.shade200,
+                ),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedRole = 'Patient';
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: _selectedRole == 'Patient'
+                                ? Colors.blue
+                                : Colors.grey.shade200,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Patient',
+                              style: TextStyle(
+                                color: _selectedRole == 'Patient'
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            _selectedRole = 'Doctor';
+                          });
+                        },
+                        child: Container(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: _selectedRole == 'Doctor'
+                                ? Colors.blue
+                                : Colors.grey.shade200,
+                          ),
+                          child: Center(
+                            child: Text(
+                              'Doctor',
+                              style: TextStyle(
+                                color: _selectedRole == 'Doctor'
+                                    ? Colors.white
+                                    : Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               TextFormField(
                 controller: _emailController,
                 decoration: InputDecoration(
@@ -109,35 +180,37 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
               ),
               SizedBox(height: 20),
-                ElevatedButton(
+              ElevatedButton(
                 onPressed: () {
                   if (_formKey.currentState!.validate()) {
-                  // Show processing message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Processing')),
-                  );
-                  // Navigate to NaviPage
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => BottomNavigation()),
-                  );
+                    // Show processing message with role information
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Processing login as $_selectedRole')),
+                    );
+                    // Navigate to NaviPage (you might want to pass the role information)
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => BottomNavigation(userRole: _selectedRole),
+                      ),
+                    );
                   }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 15),
                   shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+                    borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
-                  'Login',
+                  'Login as $_selectedRole',
                   style: TextStyle(
-                  fontSize: 18,
-                  color: Colors.white,
+                    fontSize: 18,
+                    color: Colors.white,
                   ),
                 ),
-                ),
+              ),
               SizedBox(height: 20),
               Row(
                 children: [
@@ -174,7 +247,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SignUpScreen(),
+                          builder: (context) => SignUpScreen(initialRole: _selectedRole),
                         ),
                       );
                     },
@@ -202,7 +275,7 @@ class _LoginScreenState extends State<LoginScreen> {
           text: 'Sign in with Google',
           icon: Logo(Logos.google),
           onPressed: () {
-        // Implement Google Sign-in
+            // Implement Google Sign-in (with selected role)
           },
         ),
         // SizedBox(height: 10),
@@ -218,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
           text: 'Sign in with Facebook',
           icon: Logo(Logos.facebook_f),
           onPressed: () {
-        // Implement Facebook Sign-in
+            // Implement Facebook Sign-in (with selected role)
           },
         ),
       ],

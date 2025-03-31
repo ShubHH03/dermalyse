@@ -51,7 +51,7 @@ class _ProfileState extends State<Profile> {
                           color: Colors.white,
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(Icons.camera_alt, size: 16, color: Colors.blue),
+                        // child: Icon(Icons.camera_alt, size: 16, color: Colors.blue),
                       ),
                     ],
                   ),
@@ -59,7 +59,7 @@ class _ProfileState extends State<Profile> {
                 SizedBox(height: 15),
                 // Name
                 Text(
-                  'Amelia Renata',
+                  'Soham Waghela',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 22,

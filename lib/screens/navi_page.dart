@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:login_signup/screens/home_screen.dart';
 import 'package:login_signup/screens/set_photo_screen.dart';
 import 'package:login_signup/screens/profile.dart';
+import 'package:login_signup/screens/doctors.dart';
+import 'package:login_signup/screens/patients.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,20 +23,84 @@ class MyApp extends StatelessWidget {
 }
 
 class BottomNavigation extends StatefulWidget {
+  final String userRole; // Add user role parameter
+
+  // Constructor with default value for backward compatibility
+  BottomNavigation({this.userRole = 'Patient'});
+
   @override
   _BottomNavigationState createState() => _BottomNavigationState();
 }
 
 class _BottomNavigationState extends State<BottomNavigation> {
   int _selectedIndex = 0;
+  late List<Widget> _pages;
+  late List<BottomNavigationBarItem> _navigationItems;
 
-  // List of pages to navigate to
-  final List<Widget> _pages = [
-    HomePage(),
-    AnalysisPage(),
-    DoctorsPage(),
-    Profile()
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _initializeNavigation();
+  }
+
+  // Initialize navigation based on user role
+  void _initializeNavigation() {
+    if (widget.userRole == 'Doctor') {
+      // Doctor navigation
+      _pages = [
+        HomePage(),
+        AnalysisPage(),
+        PatientsPage(),
+        Profile()
+      ];
+      
+      _navigationItems = [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.medical_services),
+          label: 'Analysis',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people),
+          label: 'Patients',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else {
+      // Patient navigation
+      _pages = [
+        HomePage(),
+        AnalysisPage(),
+        DoctorsPage(),
+        Profile()
+      ];
+      
+      _navigationItems = [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.medical_services),
+          label: 'Analysis',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.medical_information),
+          label: 'Doctors',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    }
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -45,26 +111,12 @@ class _BottomNavigationState extends State<BottomNavigation> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // appBar: AppBar(
+      //   title: Text('Dermalyse'),
+      // ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
-        items: <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_services),
-            label: 'Analysis',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.medical_information),
-            label: 'Doctors',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Profile',
-          ),
-        ],
+        items: _navigationItems,
         currentIndex: _selectedIndex,
         selectedItemColor: Colors.blue.shade700,
         unselectedItemColor: Colors.grey,
@@ -75,7 +127,7 @@ class _BottomNavigationState extends State<BottomNavigation> {
   }
 }
 
-// Placeholder pages - you'll need to implement these
+// Placeholder pages
 class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -87,24 +139,5 @@ class AnalysisPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SetPhotoScreen(); // Assuming SetPhotoScreen is your analysis page
-  }
-}
-
-class DoctorsPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text('Doctors')),
-      body: ListView(
-        children: [
-          ListTile(
-            title: Text('Dr. Marcus Horizon'),
-            subtitle: Text('Cardiologist'),
-            trailing: Text('4.7 ★'),
-          ),
-          // Add more doctor listings here
-        ],
-      ),
-    );
   }
 }

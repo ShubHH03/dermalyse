@@ -4,7 +4,10 @@ import 'package:login_signup/screens/navi_page.dart';
 import 'package:login_signup/screens/signin_screen.dart';
 
 class SignUpScreen extends StatefulWidget {
-  const SignUpScreen({super.key});
+  final String initialRole; // Add initial role parameter
+
+  // Constructor with default value
+  const SignUpScreen({super.key, this.initialRole = 'Patient'});
 
   @override
   State<SignUpScreen> createState() => _SignUpScreenState();
@@ -17,6 +20,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool agreePersonalData = false;
+  late String _selectedRole; // Role selection state variable
+
+  @override
+  void initState() {
+    super.initState();
+    // Initialize selected role from the widget parameter
+    _selectedRole = widget.initialRole;
+  }
 
   // Function to show success dialog
   void _showSuccessDialog() {
@@ -58,17 +69,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 ),
                 SizedBox(height: 10),
                 Text(
-                  'Your account has been successfully registered',
+                  'Your account has been successfully registered as $_selectedRole',
                   textAlign: TextAlign.center,
                   style: TextStyle(color: Colors.grey.shade800),
                 ),
                 SizedBox(height: 20),
                 ElevatedButton(
                   onPressed: () {
-                    // Navigate to home screen or login screen
+                    // Navigate to home screen passing the role
                     Navigator.of(context).pushReplacement(
                       MaterialPageRoute(
-                        builder: (context) => BottomNavigation(),
+                        builder: (context) => BottomNavigation(userRole: _selectedRole),
                       ),
                     );
                   },
@@ -114,6 +125,76 @@ class _SignUpScreenState extends State<SignUpScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Role selection toggle
+                Container(
+                  margin: EdgeInsets.only(bottom: 20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.grey.shade200,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedRole = 'Patient';
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: _selectedRole == 'Patient'
+                                  ? Colors.blue.shade700
+                                  : Colors.grey.shade200,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Patient',
+                                style: TextStyle(
+                                  color: _selectedRole == 'Patient'
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _selectedRole = 'Doctor';
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: _selectedRole == 'Doctor'
+                                  ? Colors.blue.shade700
+                                  : Colors.grey.shade200,
+                            ),
+                            child: Center(
+                              child: Text(
+                                'Doctor',
+                                style: TextStyle(
+                                  color: _selectedRole == 'Doctor'
+                                      ? Colors.white
+                                      : Colors.black,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 TextFormField(
                   controller: _nameController,
                   decoration: InputDecoration(
@@ -177,6 +258,25 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     return null;
                   },
                 ),
+                // Add specialty field if Doctor is selected
+                if (_selectedRole == 'Doctor') ...[
+                  SizedBox(height: 20),
+                  TextFormField(
+                    decoration: InputDecoration(
+                      prefixIcon: Icon(Icons.medical_services_outlined),
+                      hintText: 'Medical Specialty',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    validator: (value) {
+                      if (_selectedRole == 'Doctor' && (value == null || value.isEmpty)) {
+                        return 'Please enter your medical specialty';
+                      }
+                      return null;
+                    },
+                  ),
+                ],
                 SizedBox(height: 20),
                 Row(
                   children: [
@@ -213,7 +313,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   onPressed: () {
                     if (_formSignupKey.currentState!.validate() &&
                         agreePersonalData) {
-                      // Show success dialog instead of snackbar
+                      // Show success dialog with role information
                       _showSuccessDialog();
                     } else if (!agreePersonalData) {
                       ScaffoldMessenger.of(context).showSnackBar(
@@ -231,7 +331,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                   ),
                   child: Text(
-                    'Sign Up',
+                    'Sign Up as $_selectedRole',
                     style: TextStyle(
                       fontSize: 18,
                       color: Colors.white,

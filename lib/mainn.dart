@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'screens/set_photo_screen.dart';
+import 'screens/doctor_analysis.dart';
 
 void main() {
   runApp(const MyApp());

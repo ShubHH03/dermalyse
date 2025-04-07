@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../constants.dart';
 
 class HomeScreen extends StatelessWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  final String userId; // User ID passed from login/signup
+  final String userRole; // User role passed from login/signup
+
+  const HomeScreen({Key? key, required this.userId, required this.userRole}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -17,9 +23,11 @@ class HomeScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text(
-                    'Find your desired\nhealth solution',
-                    style: TextStyle(
+                  Text(
+                    userRole == 'Doctor'
+                        ? 'Welcome, Doctor'
+                        : 'Find your desired\nhealth solution',
+                    style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
                     ),
@@ -39,7 +47,9 @@ class HomeScreen extends StatelessWidget {
                 ),
                 child: TextField(
                   decoration: InputDecoration(
-                    hintText: 'Search doctor, articles, medicines...',
+                    hintText: userRole == 'Doctor'
+                        ? 'Search patients, articles...'
+                        : 'Search doctor, articles, medicines...',
                     prefixIcon: const Icon(Icons.search, color: Colors.grey),
                     suffixIcon: const Icon(Icons.close, color: Colors.grey),
                     border: InputBorder.none,
@@ -52,10 +62,10 @@ class HomeScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  _buildCategoryItem(Icons.local_atm, 'Ambulan...', Colors.blue),
+                  _buildCategoryItem(Icons.local_atm, 'Ambulance', Colors.blue),
                   _buildCategoryItem(Icons.medical_services_outlined, 'Doctor', Colors.blue),
                   _buildCategoryItem(Icons.medication_outlined, 'Pharmacy', Colors.blue),
-                  _buildCategoryItem(Icons.local_hospital_outlined, 'Hospi', Colors.blue),
+                  _buildCategoryItem(Icons.local_hospital_outlined, 'Hospital', Colors.blue),
                 ],
               ),
               const SizedBox(height: 24),
@@ -110,18 +120,18 @@ class HomeScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-              // Top Doctors section
+              // Top Doctors or Patients section
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: const [
+                children: [
                   Text(
-                    'Top Doctor',
-                    style: TextStyle(
+                    userRole == 'Doctor' ? 'Top Patients' : 'Top Doctors',
+                    style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  Text(
+                  const Text(
                     'See all',
                     style: TextStyle(
                       color: Colors.blue,
@@ -131,17 +141,29 @@ class HomeScreen extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 16),
-              // Doctor cards in a grid
+              // Doctor or Patient cards in a grid
               Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.75,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                  children: List.generate(
-                    4,
-                    (index) => _buildDoctorCard(),
-                  ),
+                child: FutureBuilder<List<dynamic>>(
+                  future: _fetchData(userRole),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    } else if (snapshot.hasError) {
+                      return Center(child: Text('Error: ${snapshot.error}'));
+                    } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                      return const Center(child: Text('No data available'));
+                    } else {
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        childAspectRatio: 0.75,
+                        crossAxisSpacing: 10,
+                        mainAxisSpacing: 10,
+                        children: snapshot.data!.map((item) {
+                          return _buildCard(item, userRole);
+                        }).toList(),
+                      );
+                    }
+                  },
                 ),
               ),
             ],
@@ -178,12 +200,10 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDoctorCard() {
+  Widget _buildCard(dynamic item, String userRole) {
     return Card(
       elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12)
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(10.0),
         child: Column(
@@ -198,7 +218,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '4.7',
+                  '4.5', // Placeholder rating
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[700],
@@ -219,16 +239,18 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'Dr. Marcus Horizon',
-              style: TextStyle(
+            Text(
+              item['name'] ?? 'N/A',
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 14,
               ),
             ),
             const SizedBox(height: 4),
             Text(
-              'Cardiologist',
+              userRole == 'Doctor'
+                  ? 'Disease: ${item['latest_analysis']?['disease_name'] ?? 'N/A'}'
+                  : item['specialization'] ?? 'N/A',
               style: TextStyle(
                 fontSize: 12,
                 color: Colors.grey[600],
@@ -244,7 +266,7 @@ class HomeScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  '800m away',
+                  '800m away', // Placeholder distance
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.grey[400],
@@ -256,5 +278,19 @@ class HomeScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<List<dynamic>> _fetchData(String userRole) async {
+    final url = userRole == 'Doctor'
+        ? '$apiBaseUrl/doctor/$userId/patients' // Fetch patients for the doctor
+        : '$apiBaseUrl/doctors'; // Fetch doctors for the patient
+
+    final response = await http.get(Uri.parse(url));
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body);
+    } else {
+      throw Exception('Failed to load data');
+    }
   }
 }

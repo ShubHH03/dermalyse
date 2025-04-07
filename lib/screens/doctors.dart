@@ -1,6 +1,55 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import '../constants.dart';
 
-class DoctorsPage extends StatelessWidget {
+class DoctorsPage extends StatefulWidget {
+  @override
+  _DoctorsPageState createState() => _DoctorsPageState();
+}
+
+class _DoctorsPageState extends State<DoctorsPage> {
+  List<dynamic> doctors = [];
+  List<dynamic> filteredDoctors = [];
+  bool isLoading = true;
+  TextEditingController searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    fetchDoctors();
+  }
+
+  Future<void> fetchDoctors() async {
+    try {
+      final response = await http.get(Uri.parse('$apiBaseUrl/doctors')); // Replace with your API URL
+      if (response.statusCode == 200) {
+        setState(() {
+          doctors = json.decode(response.body);
+          filteredDoctors = doctors; // Initialize filteredDoctors with all doctors
+          isLoading = false;
+        });
+      } else {
+        throw Exception('Failed to load doctors');
+      }
+    } catch (e) {
+      setState(() {
+        isLoading = false;
+      });
+      print('Error fetching doctors: $e');
+    }
+  }
+
+  void filterDoctors(String query) {
+    setState(() {
+      filteredDoctors = doctors
+          .where((doctor) =>
+      doctor['name'].toLowerCase().contains(query.toLowerCase()) ||
+          doctor['specialization'].toLowerCase().contains(query.toLowerCase()))
+          .toList();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -12,53 +61,44 @@ class DoctorsPage extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: ListView(
+      body: Column(
         children: [
-          ListTile(
-            title: Text('Dr. Marcus Horizon'),
-            subtitle: Text('Cardiologist'),
-            trailing: Text('4.7 ★'),
-            leading: CircleAvatar(
-              backgroundColor: Colors.blue.shade200,
-              child: Text('MH'),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: TextField(
+              controller: searchController,
+              decoration: InputDecoration(
+                labelText: 'Search',
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(),
+              ),
+              onChanged: filterDoctors,
             ),
-            onTap: () {
-              // Navigate to doctor details
-            },
           ),
-          ListTile(
-            title: Text('Dr. Sarah Reynolds'),
-            subtitle: Text('Dermatologist'),
-            trailing: Text('4.9 ★'),
-            leading: CircleAvatar(
-              backgroundColor: Colors.green.shade200,
-              child: Text('SR'),
+          Expanded(
+            child: isLoading
+                ? Center(child: CircularProgressIndicator())
+                : filteredDoctors.isEmpty
+                ? Center(child: Text('No doctors available'))
+                : ListView.builder(
+              itemCount: filteredDoctors.length,
+              itemBuilder: (context, index) {
+                final doctor = filteredDoctors[index];
+                return ListTile(
+                  title: Text(doctor['name']),
+                  subtitle: Text(doctor['specialization']),
+                  leading: CircleAvatar(
+                    backgroundColor: Colors.blue.shade200,
+                    child: Text(doctor['name'][0]),
+                  ),
+                  onTap: () {
+                    // Navigate to doctor details or perform an action
+                  },
+                );
+              },
             ),
-            onTap: () {
-              // Navigate to doctor details
-            },
           ),
-          ListTile(
-            title: Text('Dr. James Wilson'),
-            subtitle: Text('Dermatologist'),
-            trailing: Text('4.5 ★'),
-            leading: CircleAvatar(
-              backgroundColor: Colors.purple.shade200,
-              child: Text('JW'),
-            ),
-            onTap: () {
-              // Navigate to doctor details
-            },
-          ),
-          // Add more doctor listings here
         ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Add functionality to search or filter doctors
-        },
-        child: Icon(Icons.search),
-        tooltip: 'Search doctors',
       ),
     );
   }

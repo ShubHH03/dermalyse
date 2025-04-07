@@ -1,299 +1,109 @@
 import 'package:flutter/material.dart';
-import 'set_photo_screen.dart';
+import 'package:login_signup/screens/home_screen.dart';
+import 'package:login_signup/screens/doctor_analysis.dart';
+import 'package:login_signup/screens/patients_analysis.dart';
+import 'package:login_signup/screens/patients.dart';
+import 'package:login_signup/screens/doctors.dart';
+import 'package:login_signup/screens/profile.dart';
 
+class BottomNavigation extends StatefulWidget {
+  final String userId; // User ID passed from login/signup
+  final String userRole; // User role passed from login/signup
 
-class PatientFormScreen extends StatelessWidget {
-  const PatientFormScreen({Key? key}) : super(key: key);
-
-  //--------Alter code from here ----
-
-  @override
-  Widget build(BuildContext context) {
-  return MaterialApp(
-  debugShowCheckedModeBanner: false,
-  title: 'Dermacare',
-  theme: ThemeData(
-  primarySwatch: Colors.blue,
-  appBarTheme: const AppBarTheme(backgroundColor: Color(0xFF416FDF))),
-  home: const PatientFormWidget(),
-  );
-  }
-  }
-
-  class PatientFormWidget extends StatefulWidget {
-  const PatientFormWidget({Key? key})
-      : super(key: key); // Added named 'key' parameter
+  const BottomNavigation({Key? key, required this.userId, required this.userRole}) : super(key: key);
 
   @override
-  State<PatientFormWidget> createState() => _PatientFormWidgetState();
-  }
+  _BottomNavigationState createState() => _BottomNavigationState();
+}
 
-  class _PatientFormWidgetState extends State<PatientFormWidget> {
-  late TextEditingController _fullNameController;
-  late TextEditingController _ageController;
-  late TextEditingController _dateOfBirthController;
-  String _skinType = '';
-  bool _isFemaleSelected = false;
-  bool _isMaleSelected = false;
+class _BottomNavigationState extends State<BottomNavigation> {
+  int _selectedIndex = 0;
+  late List<Widget> _pages;
+  late List<BottomNavigationBarItem> _navigationItems;
 
   @override
   void initState() {
-  super.initState();
-  _fullNameController = TextEditingController();
-  _ageController = TextEditingController();
-  _dateOfBirthController = TextEditingController();
+    super.initState();
+    _initializeNavigation();
   }
 
-  @override
-  void dispose() {
-  _fullNameController.dispose();
-  _ageController.dispose();
-  _dateOfBirthController.dispose();
-  super.dispose();
+  // Initialize navigation based on user role
+  void _initializeNavigation() {
+    if (widget.userRole == 'Doctor') {
+      // Doctor navigation
+      _pages = [
+        HomeScreen(userId: widget.userId, userRole: widget.userRole),
+        SetPhotoScreen(), // Doctor-specific analysis screen
+        PatientsPage(doctorId: widget.userId), // Pass doctorId to PatientsPage
+        Profile(userId: widget.userId, userRole: widget.userRole), // Pass userId and userRole to Profile
+      ];
+
+      _navigationItems = [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.analytics),
+          label: 'Analysis',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.people),
+          label: 'Patients',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    } else {
+      // Patient navigation
+      _pages = [
+        HomeScreen(userId: widget.userId, userRole: widget.userRole),
+        PatientAnalysisScreen(userId: widget.userId), // Patient-specific analysis screen
+        DoctorsPage(), // DoctorsPage for patients
+        Profile(userId: widget.userId, userRole: widget.userRole), // Pass userId and userRole to Profile
+      ];
+
+      _navigationItems = [
+        BottomNavigationBarItem(
+          icon: Icon(Icons.home),
+          label: 'Home',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.analytics),
+          label: 'Analysis',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.medical_services),
+          label: 'Doctors',
+        ),
+        BottomNavigationBarItem(
+          icon: Icon(Icons.person),
+          label: 'Profile',
+        ),
+      ];
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-  //APP BAR
-
-  appBar: AppBar(
-  title: const Text(
-  'DERMACARE',
-  style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-  ),
-  leading: const Icon(
-  Icons.menu,
-  color: Colors.white,
-  ),
-  centerTitle: true,
-  ),
-  body: SingleChildScrollView(
-  padding: const EdgeInsets.all(16),
-  child: Column(
-  crossAxisAlignment: CrossAxisAlignment.start,
-  children: [
-  //FULL NAME
-
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-  const Text(
-  'Full Name',
-  style: TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF416FDF)),
-  ),
-  TextFormField(
-  controller: _fullNameController,
-  decoration: const InputDecoration(
-  hintText: 'Enter your full name',
-  ),
-  ),
-  const SizedBox(height: 16),
-  //AGE
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-  const Text(
-  'Age',
-  style: TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF416FDF)),
-  ),
-  TextFormField(
-  controller: _ageController,
-  keyboardType: TextInputType.number,
-  decoration: const InputDecoration(
-  hintText: 'Enter your age',
-  ),
-  ),
-  const SizedBox(height: 16),
-
-  // DOB
-
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-  const Text(
-  'Date of Birth',
-  style: TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF416FDF),
-  ),
-  ),
-  GestureDetector(
-  onTap: () async {
-  final selectedDate = await showDatePicker(
-  context: context,
-  initialDate: DateTime.now(),
-  firstDate: DateTime(1900),
-  lastDate: DateTime.now(),
-  );
-  if (selectedDate != null) {
-  setState(() {
-  _dateOfBirthController.text =
-  selectedDate.toIso8601String().split('T')[0];
-  });
-  }
-  },
-  child: AbsorbPointer(
-  child: TextFormField(
-  controller: _dateOfBirthController,
-  decoration: const InputDecoration(
-  hintText: 'Select your date of birth',
-  suffixIcon: Icon(Icons.calendar_today),
-  ),
-  ),
-  ),
-  ),
-  const SizedBox(height: 16),
-
-  //SKIN TYPE
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-  const Text(
-  'Skin Type',
-  style: TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF416FDF),
-  ),
-  ),
-  DropdownButtonFormField<String>(
-  value: _skinType.isNotEmpty ? _skinType : null,
-  onChanged: (value) {
-  setState(() {
-  _skinType = value!;
-  });
-  },
-  items: const [
-  DropdownMenuItem(
-  value: 'Light',
-  child: CircleAvatar(
-  backgroundColor: Color(0xFFFFE0BD), // Light skin color
-  ),
-  ),
-  DropdownMenuItem(
-  value: 'Medium',
-  child: CircleAvatar(
-  backgroundColor: Color(0xFFFFCD94), // Medium skin color
-  ),
-  ),
-  DropdownMenuItem(
-  value: 'Dark',
-  child: CircleAvatar(
-  backgroundColor: Color(0xFFE0AC69), // Dark skin color
-  ),
-  ),
-  DropdownMenuItem(
-  value: 'More Dark',
-  child: CircleAvatar(
-  backgroundColor:
-  Color.fromARGB(255, 228, 163, 78), // Dark skin color
-  ),
-  ),
-  DropdownMenuItem(
-  value: 'Even More Dark',
-  child: CircleAvatar(
-  backgroundColor:
-  Color.fromARGB(255, 226, 139, 25), // Dark skin color
-  ),
-  ),
-  ],
-  ),
-  const SizedBox(height: 16),
-
-  //GENDER
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-  const Text(
-  'Gender',
-  style: TextStyle(
-  fontSize: 20,
-  fontWeight: FontWeight.bold,
-  color: Color(0xFF416FDF),
-  ),
-  ),
-  Row(
-  children: [
-  Checkbox(
-  activeColor: Colors.blue,
-  value: _isFemaleSelected,
-  onChanged: (value) {
-  setState(() {
-  _isFemaleSelected = value!;
-  if (_isFemaleSelected) {
-  _isMaleSelected = false;
-  }
-  });
-  },
-  ),
-  const Text(
-  'Female',
-  style: TextStyle(
-  fontSize: 15,
-  ),
-  ),
-  Checkbox(
-  activeColor: const Color(0xFF416FDF),
-  value: _isMaleSelected,
-  onChanged: (value) {
-  setState(() {
-  _isMaleSelected = value!;
-  if (_isMaleSelected) {
-  _isFemaleSelected = false;
-  }
-  });
-  },
-  ),
-  const Text('Male'),
-  ],
-  ),
-  const SizedBox(height: 16),
-  Container(
-  margin: const EdgeInsets.symmetric(
-  vertical: 10,
-  ),
-  ),
-    ElevatedButton(
-      style: ElevatedButton.styleFrom(
-        minimumSize: const Size(375, 50),
-        backgroundColor: const Color(0xFF416FDF),
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: _navigationItems,
+        currentIndex: _selectedIndex,
+        selectedItemColor: Colors.blue.shade700,
+        unselectedItemColor: Colors.grey,
+        onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
       ),
-      onPressed: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => SetPhotoScreen()),
-        );
-      },
-      child: const Text(
-        'Submit',
-        style: TextStyle(
-          fontSize: 20,
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    ),
-  ],
-  ),
-  ),
-  );
+    );
   }
-  }
+}

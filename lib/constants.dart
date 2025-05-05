@@ -11,4 +11,4 @@ const kHeadSubtitleTextStyle = TextStyle(
   color: Colors.black87,
 );
 
-const String apiBaseUrl = 'http://192.168.31.229:5001/api';
+const String apiBaseUrl = 'https://0acf-2401-4900-1d3d-d2ee-5492-2048-3ecc-cf81.ngrok-free.app/api';

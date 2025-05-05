@@ -108,13 +108,13 @@ class HomeScreen extends StatelessWidget {
                           ),
                         ),
                       ),
-                      Expanded(
-                        flex: 1,
-                        child: Image.network(
-                          'https://via.placeholder.com/150',
-                          fit: BoxFit.cover,
-                        ),
-                      ),
+                      // Expanded(
+                      //   flex: 1,
+                      //   child: Image.network(
+                      //     'https://t4.ftcdn.net/jpg/02/60/04/09/360_F_260040900_oO6YW1sHTnKxby4GcjCvtypUCWjnQRg5.jpg',
+                      //     fit: BoxFit.cover,
+                      //   ),
+                      // ),
                     ],
                   ),
                 ),

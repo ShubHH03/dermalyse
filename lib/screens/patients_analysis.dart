@@ -4,9 +4,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import '../constants.dart';
+import 'package:login_signup/screens/treatment_page.dart'; // Import for TreatmentPage
 
 class PatientAnalysisScreen extends StatefulWidget {
-  final String userId; // Accept userId as a parameter
+  final String userId;
 
   const PatientAnalysisScreen({Key? key, required this.userId}) : super(key: key);
 
@@ -92,28 +93,51 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
           'name': _name,
           'doctor_id': _selectedDoctorId,
           'image': base64Image,
+          'patient_id': widget.userId,
         }),
       );
 
       if (response.statusCode == 200) {
         final result = json.decode(response.body);
+
+        // Refresh the analysis results
+        await _fetchAnalysisResults();
+
+        setState(() {
+          _isLoading = false;
+        });
+
+        // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Prediction saved: ${result.toString()}')),
+          SnackBar(content: Text('Analysis submitted successfully')),
         );
-        _fetchAnalysisResults(); // Refresh the analysis results
+
+        // Navigate to treatment page if disease name is available
+        if (result.containsKey('disease_name')) {
+          _navigateToTreatment(result['disease_name']);
+        }
       } else {
-        throw Exception('Failed to save patient');
+        throw Exception('Failed to save analysis');
       }
     } catch (e) {
       print('Error submitting form: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error: $e')),
-      );
-    } finally {
       setState(() {
         _isLoading = false;
       });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: $e')),
+      );
     }
+  }
+
+  // Navigate to treatment page
+  void _navigateToTreatment(String diseaseName) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => TreatmentPage(diseaseName: diseaseName),
+      ),
+    );
   }
 
   Future<void> _pickImage(ImageSource source) async {
@@ -146,11 +170,6 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Submit Analysis',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
                   TextFormField(
                     decoration: InputDecoration(
                       labelText: 'Patient Name',
@@ -168,9 +187,7 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
                   ),
                   const SizedBox(height: 16),
                   _isFetchingDoctors
-                      ? CircularProgressIndicator()
-                      : _doctors.isEmpty
-                      ? Text('No doctors available')
+                      ? Center(child: CircularProgressIndicator())
                       : DropdownButtonFormField<String>(
                     decoration: InputDecoration(
                       labelText: 'Select Doctor',
@@ -195,11 +212,15 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  _selectedImage == null
-                      ? Text('No image selected')
-                      : Image.file(
-                    _selectedImage!,
-                    height: 150,
+                  Center(
+                    child: _selectedImage == null
+                        ? Text('No image selected')
+                        : Image.file(
+                      _selectedImage!,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Row(
@@ -210,7 +231,12 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
                         icon: Icon(Icons.image),
                         label: Text('Gallery'),
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade500,
+                          foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
                       ElevatedButton.icon(
@@ -218,30 +244,41 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
                         icon: Icon(Icons.camera_alt),
                         label: Text('Camera'),
                         style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue.shade500,
+                          foregroundColor: Colors.white,
                           padding: EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 25),
                   Center(
                     child: ElevatedButton(
                       onPressed: _submitForm,
                       child: Text('Submit'),
                       style: ElevatedButton.styleFrom(
-                        padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+                        backgroundColor: Colors.blue.shade500,
+                        foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30),
+                        ),
+                        minimumSize: Size(200, 50),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 30),
             Text(
               'Analysis Results',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
             _analysisResults.isEmpty
                 ? Center(child: Text('No analysis results found'))
                 : ListView.builder(
@@ -250,15 +287,59 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
               itemCount: _analysisResults.length,
               itemBuilder: (context, index) {
                 final result = _analysisResults[index];
-                return Card(
-                  margin: EdgeInsets.symmetric(vertical: 8),
-                  child: ListTile(
-                    title: Text(result['disease_name']),
-                    subtitle: Text('Confidence: ${result['disease_score']}%'),
-                    trailing: Text(result['timestamp']),
-                    onTap: () {
-                      // Handle tap to show more details
-                    },
+                // Extract disease name and confidence score
+                final diseaseName = result['disease_name'] ?? 'Unknown';
+                final confidence = result['disease_score'] ?? 0.0;
+                final timestamp = result['timestamp'] ?? '';
+
+                return GestureDetector(
+                  onTap: () => _navigateToTreatment(diseaseName),
+                  child: Card(
+                    margin: EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    color: Colors.grey.shade100,
+                    child: Padding(
+                      padding: EdgeInsets.all(16.0),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  diseaseName,
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                Text(
+                                  'Confidence: ${confidence.toStringAsFixed(2)}%',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                timestamp,
+                                style: TextStyle(
+                                  color: Colors.grey.shade700,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 );
               },
@@ -266,6 +347,32 @@ class _PatientAnalysisScreenState extends State<PatientAnalysisScreen> {
           ],
         ),
       ),
+      // bottomNavigationBar: BottomNavigationBar(
+      //   currentIndex: 1, // Analysis tab selected
+      //   type: BottomNavigationBarType.fixed,
+      //   items: [
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.home),
+      //       label: 'Home',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.bar_chart),
+      //       label: 'Analysis',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.medical_services),
+      //       label: 'Doctors',
+      //     ),
+      //     BottomNavigationBarItem(
+      //       icon: Icon(Icons.person),
+      //       label: 'Profile',
+      //     ),
+      //   ],
+      //   onTap: (index) {
+      //     // Handle bottom navigation tap
+      //     // Implement navigation to other screens here
+      //   },
+      // ),
     );
   }
 }
